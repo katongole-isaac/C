@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "*.html.erb": "html",
+    "limits.h": "c",
+    "time.h": "c"
+  }
+}

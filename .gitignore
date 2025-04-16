@@ -1,1 +1,8 @@
+# directories
 _examples/
+examples/
+exercise*
+
+# files
+playground*
+test*
