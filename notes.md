@@ -99,3 +99,39 @@ Declarations specifies a type, and contains a list of one or more variables of t
     int pi = 3.14 // declaration and initilization 
 ```
 > **NOTE:** External and static variables are initialized to zero by default. Automatic variables for which is no explicit initializer have `undefined` (garbage) values. 
+
+The qualifer `const` can be applied to the declaration of any variable to specify that its value will not be changed. For an array, the `const` qualifier says that the elements will not be altered
+```c
+    const int marks[] = {21,31,3}; // immutable
+    marks[0] = 2 // throws 
+```
+The `const` declaration can be used with array augments, to indicate that the function does not change that array;
+```c
+    int strlen(const str[]);
+```  
+
+### Type Conversions  
+
+When an operator has operands of different types, they are converted to a common type according to a small number of rules.  
+- Only automatic conversions are those that convert a narrower operand into a wider one without losing information. e.g converting integer to floating-point in an expression `f+i` 
+- Expressions that might lose information e.g assigning a longer integer type to a shorter, or float to int may draw a warning but they are not illegal.  
+
+A `char` is just a small integer so `char`s may be freely used in arithmetic expressions. 
+
+The standard header `<ctype.h>` defines the family of functions that provide tests and conversions that are indpendent of any character set.
+
+> The definition of C guarantees that any character in the machine's standard printing character set will never be negative, so these char(s) will always be positive quantities in expression.  
+
+Finally, the explicit type conversions can be forced (coerced) in any expression, with a unary operator called `cast` 
+```c
+    (type name) expression 
+```
+In the construction, the expression is converted to the named type by the conversion rules above. The precise meaning of the cast is as if the expression were assigned to a variable of the specified type, which is then used in place of the whole construction. 
+
+### Increment and decrement operators  
+- The expression `++n` increments `n` before it's value is used while `n++` increments `n` after it's value has been used.
+```c
+ int n  = 5;
+ x = n++; // x = 5, and the increment offers after reading the value of n
+ x = ++n; // x = 6 , increment is done then the value is used.
+ ```
