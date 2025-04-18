@@ -135,3 +135,39 @@ In the construction, the expression is converted to the named type by the conver
  x = n++; // x = 5, and the increment offers after reading the value of n
  x = ++n; // x = 6 , increment is done then the value is used.
  ```
+
+ ### Bitwise Operators  
+ The bitwise `AND` operator `&` is often used to mask off some set of bits e.g 
+ ```c
+ n = n & 0177; // sets to zero all but the low-order 7 bits of n
+ ```
+ The bitwise `OR` operator `|` is used to turn bits on
+ ```c 
+  x = x | SET_ON ; // sets to one in x the bits are set to one in SET_ON
+ ```
+ The bitwise exclusive `OR` operator `^` sets a one in each bit position where it's  operands have different bits, and zero where they are the same.  
+
+ The shift operators `<< `and `>>` perform left and right shifts of their left operand by the number of bit positions given by the right operand, which must be non-negative. Thus `x << 2` shifts the value of `x` by two positions, filling vacated bits with zero; this is equivalent to multiplication by 4. Right shifting an `unsigned` quantity always fits the  vacated bits with zero. Right shifting a `signed` quantity will fill with bit signs (``arithmetic shift'') on some machines and with 0-bits (logical shift'') on others.  
+
+The unary operator `~` yields the one's complement of an integer; i.e it converts each `1-bit` into `0-bit` and vice versa. For example 
+```c 
+x = x & ~077
+```
+The unary operator `~`yields the one's complement of an integer; that is, it converts each `1-bit` into a `0-bit` and vice versa. For example
+```c
+x = x & ~077
+```
+sets the last six bits of `x` to zero. Note that `x & ~077` is independent of word length, and is thus preferable to, for example,` x & 0177700` , which assumes that x is a 16-bit quantity. The portable form involves no extra cost, since `~077` is a constant expression that can be evaluated at compile iime.  
+
+## Control Flow  
+
+### `Switch` Statement 
+The switch statement is a multi-way decision that tests whether an expression matches one of a number of constant integer values, and branches accordingly.  
+```c
+switch(expr) {
+    case const-expr: statments;
+    case const-expr: statments;
+    case const-expr: case: const-expr: statements;
+    default: statements;
+}
+```
