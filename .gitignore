@@ -6,3 +6,9 @@ exercise*
 # files
 playground*
 test*
+
+# Ignore everything recursively
+c/introduction/**
+
+# Allow .c files anywhere inside c/introduction
+!c/introduction/**/*.c
