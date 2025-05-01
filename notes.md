@@ -190,9 +190,9 @@ x = x & ~077
 
 sets the last six bits of `x` to zero. Note that `x & ~077` is independent of word length, and is thus preferable to, for example,` x & 0177700` , which assumes that x is a 16-bit quantity. The portable form involves no extra cost, since `~077` is a constant expression that can be evaluated at compile iime.
 
-## Control Flow
+### Control Flow
 
-### `Switch` Statement
+#### `Switch` Statement
 
 The switch statement is a multi-way decision that tests whether an expression matches one of a number of constant integer values, and branches accordingly.
 
@@ -205,7 +205,7 @@ switch(expr) {
 }
 ```
 
-### Goto and labels
+#### Goto and labels
 
 C provides the infinitely-abusable `goto` statement, and labels to branch to. Formally, the `goto` statement is never necessary, and in practice it is almost always easy to write code without it.  
 A label has the same form as a variable name, and is followed by a colon. It can be attached to
@@ -220,4 +220,239 @@ if(your_guess == guess) goto found;
 found:
     printf("We found the guess bro !");
 
+```
+
+Code that relies on `goto` statements is generally harder to understand and to maintain than code without `goto`s
+
+## Chapter 4  - Functions and Program Structure  
+
+Each function definition has the following form
+```c
+return-type function-name(argument declarations){
+    declarations and statements;
+}
+
+// e.g int func(int x) {}
+```
+A minimal function is which does nothing and returns nothing. e.g `dummy() {}`. A do-nothing function like such is sometimes useful as a placeholder during program dev't. If return-type is omitted `int` is assumed. 
+
+### External Variables  
+External variables are defined outside of any function, and are thus potentionally available to many functions. Functions themselves are always external **because C does not allow fun(s) to be defined inside other functions.**   
+
+By default, external variables and functions have the property that all references to them by the same name, even from functions compiled separately, are references to the same thing. (The standard calls this property **external linkage** .)  
+
+#### Scope Rules  
+The functions and external variables that make up a C program need not all be compiled at the same time; the source text of the program may be kept in  several files, and previously compiled routines may be loaded from libraries. Among the questions of interest are 
+- How are declarations written so that variables are properly declared during compilation? 
+- How are declarations arranged so that all the pieces will be properly connected when the program is loaded? 
+- How are declarations organized so there is only one copy?
+How are external variables initialized?  
+
+The scope of a name is the part of the program within which the name can be used. For an automatic variable declared at the beginning of a function, the scope is the function in which the name is declared. Local variables of the same name in different functions are unrelated.  The same is true of the parameters of the function, which are in effect local variables.  
+
+The scope of an external variable or a function lasts from the point at which it is declared to the end of the file being compiled. For example, if `main , sp , val , push , and pop` are defined in one file, in the order shown above
+
+```c
+main() { ... }
+
+int sp = 0;
+double val[MAXVAL];
+
+void push(double f) { ... }
+double pop(void) { ... }
+```
+
+then the variables sp and val may be used in push and pop simply by naming them; no further declarations are needed. But these names are not visible in `main , nor are push and pop` themselves.
+
+If an external variable is to be referred to before it is defined, or if it is defined in a different source file from the one where it is being used, then an extern declaration is mandatory.  
+
+It is important to distinguish between the declaration of an external variable and its definition . A declaration announces the properties of a variable *(primarily its type)*; a definition also
+causes storage to be set aside.
+
+```c
+int sp;
+double val[MAXVAL];
+```
+If the above lines appear outside of any function, they define the external variables `sp` and` val` , cause storage to be set aside, and also serve as the declarations for the rest of that source file.  
+
+```c
+extern int sp;
+extern double val[];
+```
+The lines declare for the rest of the source file that `sp` is an `int` and that `val` is a `double` array (whose size is determined elsewhere), but they do not create the variables or reserve storage for them.  
+
+There must be only one definition of an external variable among all the files that make up the source program; other files may contain `extern` declarations to access it. (There may also be `extern` declarations in the file containing the definition.) Array sizes must be specified with the definition, but are optional with an `extern` declaration.  
+
+> Initialization of an external variable goes only with the definition.  
+
+#### Header Files  
+A header file in C is a file with the extension `.h` that contains C declarations and macro definitions to be shared between several source files. It allows the sharing of common code among multiple source files, promoting modularity and reuse. Header files typically contain function prototypes, structure and union definitions, type definitions, and macro definitions 
+```c
+// calc.h
+#define PI 3.14
+void velocity(void);
+void acceleration(void);
+```
+```c
+// main.c 
+#include <stdio.h> // system header files
+#include "calc.h"; // user-defined header files
+main(){...}
+```
+
+#### Static variables  
+
+The `static` declaration applied to an external variable or function, limits the scope of that object to the rest of the source file being compiled.  External `static` thus provides a way to hide names like `buf` and `bufp` in the `getch-ungetch` combination, which must be external so they can be shared, yet which should not be visible to users of `getch` and `ungetch` functions.  
+Static storage is specified by prefixing the normal declaration with the word `static`.
+```c
+static int external ; 
+static void print(void){...};
+```
+
+**NOTE** Normally function names are global, visible to any part of the entire program, so when a function is declared `static`, however it's name is **invisible** outside of the file in which it's declared.  
+
+The `static` declaration can also be applied to internal variables. Internal `static` variables are local to a particular function just as automatic variables are, but unlike automatics, they remain in existence rather than coming and going each time the function is activated. This means that internal `static` variables provide private, permanent storage within a single
+function.  
+
+#### Register Variables  
+A `register` declaration advises the compiler that the variable in question will be heavily used. The idea is that `register` variables are to be placed in machine registers, which may result in smaller and faster programs. But compilers are free to ignore the advice. 
+```c
+register int x;
+register int y;
+```
+**NOTE:**  The `register` declaration can only be applied to automatic variables and to the formal parameters of a function.  
+```c
+f(register unsigned int m, register long n){...}
+```
+
+In practice, there are restrictions on `register` variables, reflecting the realities of underlying hardware. Only a few variables in each function may be kept in registers, and only certain types are allowed. Excess register declarations are harmless, however, since the word `register` is ignored for excess or disallowed declarations. And it is not possible to take the
+address of a `register` variable, regardless of whether the variable
+is actually placed in a register. The specific restrictions on number and types of `register` variables vary from machine to machine.  
+
+#### Initialization  
+In the absence of explicit initialization, *external* and `static` variables are guaranteed to be initialized to `zero`; *automatic* and `register` variables have undefined (i.e., garbage) initial values.  
+
+For *external* and `static` variables, the initializer must be a constant expression; the initialization is done once, conceptionally before the program begins execution. For *automatic* and `register` variables, the initializer is not restricted to being a constant: it may be any expression involving previously defined values, even function call.  
+
+### The C Preprocessor  
+C provides certain language facilities by means of a preprocessor, which is conceptionally a separate first step in compilation.   
+
+The two most frequently used features are:-  
+-  `#include ` - to include the contents of a file during compilation.  
+- `#define` -  to replace a token by an arbitrary sequence of characters.  
+
+Other features described in this section include conditional compilation and macros with arguments.  
+
+#### File Inclusion  
+File inclusion makes it easy to handle collections of `#define`s and declarations (among other things) 
+```c
+#include "some-file";  
+#include <some-std-lib>
+```
+Any source line of the above form is replaced by the contents of the file filename . If the filename is quoted, searching for the file typically begins where the source program was found; if it is not found there, or if the name is enclosed in `<`and `>`, searching follows an implementation-defined rule to find the file. An included file may itself contain `#include` lines.  
+
+#### Macro Substitution   
+
+```c
+#define name replacement_text  
+```
+The above calls for a macro substitution of the simplest kind - subsequent occurrences of the token `name` will be replaced by the `replacement_text`.  The scope of a `name` defined with `#define` is from its point of definition to the end of the source file being compiled. A definition may use previous definitions.  
+
+It is also possible to define macros with arguments, so the replacement text can be different for different calls of the macro.
+```c
+// macro with arguments 
+#define max(a,b) ((A) > (B) ? (A) : (B))
+``` 
+Although it looks like a function call, a use of max expands into in-line code. Each occurrence
+of a formal parameter (here A or B ) will be replaced by the corresponding actual argument. Thus the line
+```c
+x = max(p+q, r+s);
+```
+will be replaced by the line
+```c
+x = ((p+q) > (r+s) ? (p+q) : (r+s));
+```
+
+Nonetheless, macros are valuable. One practical example comes from `<stdio.h>` , in which `getchar` and `putchar` are often defined as macros to avoid the run-time overhead of a function call per character processed. The functions in `<ctype.h>` are also usually implemented as macros.  
+
+
+The `#undef` preprocessor directive in C is used to remove a macro definition. It effectively "undefines" a name that was previously defined using` #define`. The basic syntax is:
+```c
+#undef identifier
+```
+
+`identifier` is the name of the macro to be undefined. If the identifier is not currently defined as a macro,` #undef` has no effect. After using `#undef`, subsequent occurrences of the identifier are treated as if they were never defined.
+
+```c
+#define PI 3.14159
+#define AREA(r) (PI * r * r)
+
+int main() {
+    
+    float radius = 5.0;
+    float area = AREA(radius);
+    printf("Area: %f\n", area);
+
+    #undef PI
+    #undef AREA
+
+    // The following line would cause a compilation error because PI is no longer defined
+    // float new_area = AREA(radius); 
+
+    return 0;
+}
+```
+Formal parameters are not replaced within quoted strings. If, however, a parameter name is preceded by a `#` in the replacement text, the combination will be expanded into a quoted string with the parameter replaced by the actual argument. This can be combined with string concatenation to make, for example  
+```c
+#define dprint(expr) printf(#expr " = %g\n", expr) 
+```
+When this is invoked, as in `dprint(x/y)`, the macro is expanded into
+```c
+printf("x/y" " = &g\n", x/y);
+```
+and the strings are concantenated, so the effect is
+```c
+printf("x/y = &g\n", x/y);
+```
+
+The preprocessor operator `##` provides a way to concatenate actual arguments during macro expansion. If a parameter in the replacement text is adjacent to a `##` , the parameter is replaced by the actual argument, the `##` and surrounding white space are removed, and the result is re-scanned. 
+```c
+#define paste(front, back)  front ## back
+paste(name, 1); // create a token "name1"
+```
+
+#### Conditional Inclusion  
+
+It is possible to control preprocessing itself with conditional statements that are evaluated during preprocessing. This provides a way to include code selectively, depending on the value of conditions evaluated during compilation. 
+
+The `#if` line evaluates a constant integer expression (which may not include `sizeof` , casts, or `enum` constants). If the expression is non-zero, subsequent lines until an `#endif` or `#elif` or
+`#else` are included. (The preprocessor statement` #elif` is like `else-if` .) The expression `defined( name )` in a `#if` is `1` if the name has been defined, and `0` otherwise. 
+```c
+#if !defined(HDR)
+#define HDR
+/* contents of hdr.h go here */
+#endif
+``` 
+
+This sequence tests the name `SYSTEM` to decide which version of a header to include:
+```c
+#if SYSTEM == SYSV
+    #define HDR "sysv.h"
+    #elif SYSTEM == BSD
+    #define HDR "bsd.h"
+    #elif SYSTEM == MSDOS
+    #define HDR "msdos.h"
+    #else
+    #define HDR "default.h"
+#endif
+
+#include HDR
+```
+
+The `#ifdef` and` #ifndef` lines are specialized forms that test whether a name is defined. The first example of #if above could have been written  
+```c
+#ifndef HDR
+#define HDR
+/* contents of hdr.h go here */
+#endif
 ```
