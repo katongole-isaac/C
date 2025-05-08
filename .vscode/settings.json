@@ -3,6 +3,7 @@
     "*.ejs": "html",
     "*.html.erb": "html",
     "limits.h": "c",
-    "time.h": "c"
+    "time.h": "c",
+    "header-file.h": "c"
   }
 }

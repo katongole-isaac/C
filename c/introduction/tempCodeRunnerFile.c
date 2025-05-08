@@ -1,9 +1,5 @@
-b(){
-//     int x;
-//     printf("X1: %d", x);
-// }
-
-// c(){
-//     int x;
-//     printf("\nX2: %d", x);
-// }
+ while( *t != '\0') {
+//     *res = *s;
+//     res++;
+//     s++;
+//  }

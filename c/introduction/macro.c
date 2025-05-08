@@ -2,11 +2,11 @@
 
 #define dprint(exp) printf(#exp " = %lf\n", exp)
 
-#define paste(f, b) f ## b
+#define paste(f, b) f ## b // Token-pasting operator 
 
 // conditional Inclusion
 #if !defined(H)
-#define HN
+#define HN "it's defined as HN"
 // code 
 #endif
 
